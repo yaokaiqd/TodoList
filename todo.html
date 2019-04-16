@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>toDo3</title>
+  <style>
+    /* .crossover {
+      text-decoration: line-through;
+    }
+    .hide {
+      display:none;
+    }
+    ul li span {
+      cursor:pointer;
+    }
+    ul li.edit a {
+      display:none;
+    }
+    ul li input[type='text']{
+      display:none;
+    }
+    ul li.edit input[type='text']{
+      display:inline-block;
+    }
+    ul li.edit span{
+      display:none;
+    }
+    .Active li.crossover {
+      display:none;
+    }
+    .Completed li:not(.crossover) {
+      display:none;
+    } */
+    li.completed div .todothings {
+      text-decoration: line-through;
+      color: #d9d9d9;
+    }
+    li div .del {
+      cursor: pointer;
+    }  
+    main {
+      margin: 130px auto 30px;
+      width: 550px;
+      box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 25px 50px 0 rgba(0, 0, 0, 0.1);
+    }  
+    header {
+      border: 1px solid rgba(0,0,0,0.03);
+      background:#fff;
+    }
+    header input.todo {
+      height: 66px;
+      width: 480px;
+      border: none;
+      vertical-align: top;
+      outline: none;
+      font-size: 24px;
+    }
+    header div {
+      display: inline-block;
+      width: 60px;
+      height: 66px;
+      position: relative;
+    }
+    header div::before {
+      content: '❯';
+      font-size: 22px;
+      color: #e6e6e6;
+      font-weight: 600;
+      box-sizing: border-box;
+      position: absolute;
+      text-align: center;
+      top: 20px;
+      left: 30px;
+      transform: rotate(90deg);
+    }
+    header div input {
+      width: 60px;
+      height: 66px;
+      opacity: 0;
+    }
+    body {
+      background: #f5f5f5;
+    }
+    main ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 0;
+      margin-bottom: 0;
+      background: #fff;
+    }
+    main ul li {
+      width: 550px;
+      border-bottom: 1px solid #ededed;
+      font-size: 24px;
+    }
+    main ul li  div {
+      width: 550px;
+      vertical-align: top;
+    }
+    main ul li div span.todothings {
+      width: 440px;
+      height: 66px;
+      box-sizing: border-box;
+      padding-top:12px;
+      padding-bottom:12px;
+      display: inline-block;
+      word-break: break-all;
+      color: #4d4d4d;
+    }
+    main ul li div div.listStatus {
+      width: 60px;
+      height: 66px;
+      display: inline-block;
+      position: relative;
+    }
+    main ul li div div.listStatus::before {
+      content:'√';
+      font-size: 22px;
+      color: #fff;
+      font-weight: 600;
+      box-sizing: border-box;
+      position: absolute;
+      text-align: center;
+      top: 20px;
+      left: 28px;
+    }
+    main ul li div div.listStatus.checked::before {
+      color: #3D9970;
+    }
+    main ul li div div.listStatus input {
+      opacity: 0;
+      width: 60px;
+      height: 66px;
+    }
+    main ul li input.editBox {
+      height: 66px;
+      margin-left: 60px;
+      width: 488px;
+      font-size: 24px;
+      padding-right: 10px;
+      box-sizing: border-box;
+      padding-left: 10px;
+    }
+    h1 {
+      text-align:center;
+      margin-bottom: -50px;
+    }
+    footer {
+      background:#fff;
+      height: 40px;
+      line-height: 40px;
+      padding: 0 15px;
+      color: #777;
+    }
+    footer div label input {
+      display: none;
+    }
+    footer div label {
+      padding: 3px 7px;
+      border: 1px solid #fff;
+    }
+    footer div label:hover {
+      border-color: rgba(175, 47, 47, 0.2);
+    }
+    footer div label.checked{
+      border-color: rgba(175, 47, 47, 0.2);
+    }
+    footer button {
+      background: #fff;
+      border: none;
+      float: right;
+      height: 40px;
+      color: #777;
+    }
+    footer button:hover{
+      text-decoration:underline;
+      cursor: pointer;
+    }
+    footer div {
+      margin: auto;
+      width: 240px;
+    }
+    footer span {
+      float: left;
+    }
+    input.todo::placeholder {
+      color: #e6e6e6;
+    }
+  </style>
+</head>
+<body>
+  <section class="wrapper">
+    <!-- <input type="checkbox" class="allCheck hide">
+    <input type="text" class="addTask">
+    <ul>
+      <li>
+        <input type="checkbox" class="complete">
+        <input type="text" class="context">
+        <span></span>
+        <a href="javascript:">&times;</a>
+      </li>
+    </ul>
+    <div class="bottomBar hide">
+      <span><span class="num"></span> items left</span>
+      <input type="radio" name="choose" id="" value="All" checked>all
+      <input type="radio" name="choose" id="" value="Active">active
+      <input type="radio" name="choose" id="" value="Completed">completed
+      <button class="hide">clear completed</button>    
+    </div> -->
+  </section>
+  <script>
+    let wrapper = document.querySelector('.wrapper')
+    let todos = [{
+      content: 'xxx',
+      done: true,
+      editor: false,
+      },{
+      content: 'test',
+      done: false,
+      editor: false,
+    }]
+    let show = 'All'
+
+    function data2html(todos) {
+      return `
+        <input type="checkbox" class="allCheck ${todos.length === 0 ? 'hide' : ''}" ${todos.every(it => it.done) ? 'checked' : ''}>
+        <input type="text" class="addTask">
+        <ul class="${show}">
+        ${
+          todos.map(it => `
+            <li class="${it.done ? 'crossover' : ''} ${it.editor ? 'edit' : ''}">
+              <input type="checkbox" class="complete" ${it.done ? 'checked' : ''}>
+              <input type="text" class="context" value="${it.content}">
+              <span class="todo">${it.content}</span>
+              <a href="javascript:">&times;</a>
+            </li>
+          `).join('')
+        }
+        </ul>
+        <div class="bottomBar ${todos.length === 0 ? 'hide' : ''}">
+          <span><span class="num">${todos.filter(it => !it.done).length}</span> items left</span>
+          <input type="radio" name="choose" ${show === 'All' ? 'checked' : ''} value="All" checked>all
+          <input type="radio" name="choose" ${show === 'Active' ? 'checked' : ''} value="Active">active
+          <input type="radio" name="choose" ${show === 'Completed' ? 'checked' : ''} value="Completed">completed
+          <button class="${todos.some(it => it.done) ? '' : 'hide'}">clear completed</button>    
+        </div> 
+      `
+    }
+    function render() {
+      wrapper.innerHTML = data2html(todos)
+    }
+    document.addEventListener('DOMContentLoaded', e => {
+      render()
+    })
+    function delegate(node,selector,eventName,fn){
+      node.addEventListener(eventName,function(event){
+        if(event.target.matches(selector)) {
+          fn.call(event.target,event)
+        }
+      })
+    }
+
+    wrapper.addEventListener('keyup',e => {
+      if(e.target.matches('input.addTask')) {
+        if (e.keyCode === 13 && e.target.value.trim()) {
+          todos.push({content: e.target.value.trim(),done: false,})
+          render()
+          document.querySelector('input.addTask').focus()        
+        }
+      }
+    })
+    
+    delegate(wrapper,'a','click',function(e){
+      let index = Array.from(this.parentNode.parentNode.children).findIndex(it => it === this.parentNode)
+      todos.splice(index,1)
+      render()
+    })
+    delegate(wrapper,'input.complete','click',function(e){
+      let index = Array.from(this.parentNode.parentNode.children).findIndex(it => it === this.parentNode)
+      if(todos[index].done) {
+        todos[index].done = false
+      } else {
+        todos[index].done = true
+      }
+      render()
+    })
+    delegate(wrapper,'input.allCheck','click',function(e){
+      if(e.target.checked) {
+        todos.filter(it => !it.done).forEach(it => it.done = true)
+      } else {
+        todos.filter(it => it.done).forEach(it => it.done = false)
+      }
+      render()
+    })
+    delegate(wrapper,'button','click',function(e){
+      todos = todos.filter(it => !it.done)
+      render()
+    })
+    delegate(wrapper,'input[type="radio"]','click',function(e){
+      show = e.target.value
+      render()
+    })
+    delegate(wrapper,'span.todo','dblclick',function(e){
+      let index = Array.from(this.parentNode.parentNode.children).findIndex(it => it === this.parentNode)
+      todos[index].editor = true
+      render()
+      let temp = document.querySelector('li.edit input.context')
+      temp.focus()
+      temp.select()
+    })
+    delegate(wrapper,'input.context','focusout',function(e){
+      // 表单元素的focus,blur不可以冒泡,解决方案为捕获或者用focusin focusout事件解决
+      let index = Array.from(this.parentNode.parentNode.children).findIndex(it => it === this.parentNode)
+      if(e.target.value.trim()) {
+        todos[index].content = e.target.value
+        todos[index].editor = false 
+      } else {
+        todos.splice(index,1)
+      }
+      render()
+    })
+    delegate(wrapper,'input.context','keyup',function(e){
+      if(e.keyCode === 13) {
+        let index = Array.from(this.parentNode.parentNode.children).findIndex(it => it === this.parentNode)
+        if(e.target.value.trim()) {
+          todos[index].content = e.target.value
+          todos[index].editor = false 
+        } else {
+          todos.splice(index,1)
+        }
+        render()       
+      }
+    })
+  </script> 
+</body>
+</html>
+
+<!-- 以数据为中心实现todo -->
+<!-- 框架就是解决的这几个问题 -->
+<!-- render自动被调用 -->
+<!-- 页面局部刷新 -->
+<!-- 判断事件来源抽象出来 delegate解决--> 

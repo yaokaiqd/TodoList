@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vue-todo</title>
+  <style>
+    li.completed div .todothings {
+      text-decoration: line-through;
+      color: #d9d9d9;
+    }
+    li div .del {
+      cursor: pointer;
+    }  
+    main {
+      margin: 130px auto 30px;
+      width: 550px;
+      box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 25px 50px 0 rgba(0, 0, 0, 0.1);
+    }  
+    header {
+      border: 1px solid rgba(0,0,0,0.03);
+      background:#fff;
+    }
+    header input.todo {
+      height: 66px;
+      width: 480px;
+      border: none;
+      vertical-align: top;
+      outline: none;
+      font-size: 24px;
+    }
+    header div {
+      display: inline-block;
+      width: 60px;
+      height: 66px;
+      position: relative;
+    }
+    header div::before {
+      content: '❯';
+      font-size: 22px;
+      color: #e6e6e6;
+      font-weight: 600;
+      box-sizing: border-box;
+      position: absolute;
+      text-align: center;
+      top: 20px;
+      left: 30px;
+      transform: rotate(90deg);
+    }
+    header div input {
+      width: 60px;
+      height: 66px;
+      opacity: 0;
+    }
+    body {
+      background: #f5f5f5;
+    }
+    main ul {
+      list-style: none;
+      padding: 0;
+      margin-top: 0;
+      margin-bottom: 0;
+      background: #fff;
+    }
+    main ul li {
+      width: 550px;
+      border-bottom: 1px solid #ededed;
+      font-size: 24px;
+    }
+    main ul li  div {
+      width: 550px;
+      vertical-align: top;
+    }
+    main ul li div span.todothings {
+      width: 440px;
+      height: 66px;
+      box-sizing: border-box;
+      padding-top:12px;
+      padding-bottom:12px;
+      display: inline-block;
+      word-break: break-all;
+      color: #4d4d4d;
+    }
+    main ul li div div.listStatus {
+      width: 60px;
+      height: 66px;
+      display: inline-block;
+      position: relative;
+    }
+    main ul li div div.listStatus::before {
+      content:'√';
+      font-size: 22px;
+      color: #fff;
+      font-weight: 600;
+      box-sizing: border-box;
+      position: absolute;
+      text-align: center;
+      top: 20px;
+      left: 28px;
+    }
+    main ul li div div.listStatus.checked::before {
+      color: #3D9970;
+    }
+    main ul li div div.listStatus input {
+      opacity: 0;
+      width: 60px;
+      height: 66px;
+    }
+    main ul li input.editBox {
+      height: 66px;
+      margin-left: 60px;
+      width: 488px;
+      font-size: 24px;
+      padding-right: 10px;
+      box-sizing: border-box;
+      padding-left: 10px;
+    }
+    h1 {
+      text-align:center;
+      margin-bottom: -50px;
+    }
+    footer {
+      background:#fff;
+      height: 40px;
+      line-height: 40px;
+      padding: 0 15px;
+      color: #777;
+    }
+    footer div label input {
+      display: none;
+    }
+    footer div label {
+      padding: 3px 7px;
+      border: 1px solid #fff;
+    }
+    footer div label:hover {
+      border-color: rgba(175, 47, 47, 0.2);
+    }
+    footer div label.checked{
+      border-color: rgba(175, 47, 47, 0.2);
+    }
+    footer button {
+      background: #fff;
+      border: none;
+      float: right;
+      height: 40px;
+      color: #777;
+    }
+    footer button:hover{
+      text-decoration:underline;
+      cursor: pointer;
+    }
+    footer div {
+      margin: auto;
+      width: 240px;
+    }
+    footer span {
+      float: left;
+    }
+    input.todo::placeholder {
+      color: #e6e6e6;
+    }
+  </style>
+</head>
+<body>
+  <h1>Todos</h1>
+  <div id="app">
+    <main>
+      <header>
+        <div><input type="checkbox" :checked="changeDone" @click="selectAll" v-if="todos.length != 0" class="selectAll"></div>
+        <input type="text" v-model.trim="message" v-on:keyup.enter="addList" class="todo" placeholder="What needs to be done ?">
+      </header>
+      <ul>
+        <li v-for="(todo,index) in showTodos" :class="iscompleted(todo)">
+          <div v-show="index != editIndex">
+            <div class="listStatus" :class="todo.done ? 'checked' : ''"><input type="checkbox" v-model="todo.done"></div>
+            <span  class="todothings" @dblclick="edit(index,$event)">{{todo.content}}</span>
+            <span v-on:click="delList(index)" class="del">&times;</span>
+          </div>
+          <input ref="focusIn" type="text" v-model="todo.content" class="editBox" v-show="index == editIndex" @keyup.enter="changeTodo(todo,index)" @blur="changeTodo(todo,index)">
+        </li>
+      </ul>
+      <footer v-show="todos.length != 0">
+        <span>{{todos.filter(it => it.done === false).length}} item left</span>
+        <button v-if="todos.find(it => it.done === true)" @click="delCompleted">Clear completed</button>
+        <div>
+          <label :class="show == 'All' ? 'checked' : ''"><input v-model="show" type="radio" value="All">All</label>
+          <label :class="show == 'Completed' ? 'checked' : ''"><input v-model="show" type="radio" value="Completed">Completed</label>
+          <label :class="show == 'Active' ? 'checked' : ''"><input v-model="show" type="radio" value="Active">Active</label>
+        </div>
+      </footer>
+      <!-- <span>{{testA()}}</span> 疑问-->
+      <!-- <span>{{tasdac}}</span> 疑问-->
+    </main>
+  </div>
+  <script src="vue2.5.17.js"></script>
+  <script>
+    var app = new Vue({
+      el: '#app',
+      data: {
+        editIndex: -1,
+        message: '',
+        show: 'All',
+        todos: [
+          {content:'test content',done:false,},
+          {content:'test content2',done:true,},
+        ]
+      },
+      computed: {
+        changeDone: function() {
+          return this.todos.every(it => it.done)
+        },
+        showTodos: function() {
+          if(this.show === 'All') {
+            return this.todos
+          } else if(this.show === 'Active') {
+            return this.todos.filter(it => !it.done)
+          } else {
+            return this.todos.filter(it => it.done)
+          }
+        },
+      },
+      methods: {
+        changeTodo(item,index) {
+          if(!item.content) {
+            this.$data.todos.splice(index,1)
+          }
+          this.$data.editIndex = -1
+        },
+        addList: function() {
+          if(app.$data.message) {
+            app.$data.todos.push({content: app.$data.message,done:false,})
+            app.$data.message = ''
+          }
+        },
+        edit: function(index,e) {
+          this.editIndex = index
+          Vue.nextTick(() => {
+            this.$refs.focusIn[this.editIndex].focus()
+          });
+        },
+        iscompleted: function(todo) {
+          return {
+            completed: todo.done,   
+          }
+        },
+        delList: function(index) {
+          app.todos.splice(index,1)
+        },
+        selectAll: function() {
+          // console.log(this,app.$data)
+          if(app.$data.todos.every(it => it.done)) {
+            app.$data.todos.forEach(it => it.done = false)
+          } else {
+            app.$data.todos.forEach(it => it.done = true)
+          }
+        },
+        // showList: function(todos,stats) {
+        //   //此处疑问  为何不传入stats访问不到app.$data.show ,而上面的selectAll等函数在不传参的情况下却可以访问到
+        //   // console.log(this)
+        //   // console.log(this.show)
+        //   if(stats === 'Completed') {
+        //     return todos.filter(it => it.done)
+        //   } else if (stats === 'Active') {
+        //     return todos.filter(it => !it.done)
+        //   } else {
+        //     return todos
+        //   }
+        // },
+        testA: function() {
+          return app.$data.show
+        }, //疑问 
+        delCompleted: function() {
+          app.todos = app.todos.filter(it => !it.done)
+        }
+      }
+    })
+  </script>
+</body>
+</html>
+
+<!-- 计算属性无法传参 -->
+<!-- span 内纯字母或数字不换行 word-wrap: break-word -->
